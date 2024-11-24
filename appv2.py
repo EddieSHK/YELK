@@ -59,20 +59,28 @@ def extract_text_from_pptx(file):
 
 def extract_text_from_image(file):
     """Extract text from an image using PaddleOCR."""
-    # Initialize PaddleOCR
-    ocr = PaddleOCR(use_angle_cls=True, lang='en')  # Set language as English
-    image = Image.open(file)
-    if image.mode != 'RGB':
-        image = image.convert('RGB')
+    try:
+        # Initialize PaddleOCR (ensure that paddleocr is installed and configured correctly)
+        ocr = PaddleOCR(use_angle_cls=True, lang='en')  # Set language as English
 
-    # Perform OCR on the image
-    result = ocr.ocr(image, cls=True)
+        # Ensure file is opened correctly
+        image = Image.open(file)
 
-    # Extract text from the OCR result
-    text = ""
-    for line in result[0]:
-        text += line[1] + " "
-    return text
+        # Convert the image to RGB if it's not already (PaddleOCR requires RGB)
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+
+        # Perform OCR on the image
+        result = ocr.ocr(image, cls=True)
+
+        # Extract text from the OCR result
+        text = ""
+        for line in result[0]:
+            text += line[1] + " "
+        return text
+    except Exception as e:
+        print(f"Error processing image: {e}")
+        return ""
 
 
 def ask_gemini_ai_with_genai(text: str):
@@ -101,11 +109,39 @@ def ask_gemini_ai_with_genai(text: str):
     return summary, flashcards
 
 
+def ask_gemini_for_answer(question: str):
+    """Query Gemini AI for an answer to a specific question."""
+    genai.configure(api_key="AIzaSyAe9JnvjQNtr95ZeLEXLS9Ay9yzrA7vidM")
+    model = genai.GenerativeModel('gemini-pro')
+
+    # Generate answer to the question
+    prompt = f"Answer the following question:\n\n{question}"
+
+    response = model.generate_content(prompt)
+
+    # Return the response text
+    return response.text
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
 
+@app.route('/ask_question', methods=['POST'])
+def ask_question():
+    """Endpoint for asking a custom question to Gemini AI."""
+    question = request.form.get('question')
+
+    if not question:
+        return jsonify({"error": "No question provided"}), 400
+
+    # Get the answer from Gemini AI
+    answer = ask_gemini_for_answer(question)
+
+    return jsonify({
+        "question": question,
+        "answer": answer
+    })
 @app.route('/generate_flashcards', methods=['POST'])
 def generate_flashcards():
     if 'file' not in request.files:

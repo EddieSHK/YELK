@@ -15,9 +15,46 @@
             <button type="submit">Generate Flashcards</button>
         </form>
         <div id="result" class="result-container"></div>
+        <form id="questionForm">
+        <label for="question">ASK EDDIE IF YOU FACE ANY QUESTION:</label>
+        <input type="text" id="question" name="question" required>
+        <button type="submit">Ask</button>
+    </form>
+
+    <div id="answerSection" style="display:none;">
+        <h2>Answer:</h2>
+        <p id="answerText"></p>
+    </div>
     </div>
 
+
     <script>
+        // Handle the form submission for asking a question
+        document.getElementById("questionForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent form from submitting normally
+
+            const question = document.getElementById("question").value;
+
+            fetch('/ask_question', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'question=' + encodeURIComponent(question)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.answer) {
+                    document.getElementById("answerText").textContent = data.answer;
+                    document.getElementById("answerSection").style.display = "block";
+                } else {
+                    alert("Error: " + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
         const form = document.getElementById('upload-form');
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
