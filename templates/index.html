@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>AI Flashcard Generator</title>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Flashcard Generator</h1>
+        <form id="upload-form">
+            <label for="file">Upload PDF Document:</label>
+            <input type="file" name="file" id="file" required>
+            <button type="submit">Generate Flashcards</button>
+        </form>
+        <div id="result" class="result-container"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('upload-form');
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(form);
+
+            const response = await fetch('/generate_flashcards', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+
+                // Display results
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `
+                    <h2>Summary</h2>
+                    <div class="summary">
+                        ${data.summary_points.map(point => `
+                            <p>${point}</p>
+                        `).join('')}
+                    </div>
+                    <h2>Flashcards</h2>
+                    <div class="flashcards">
+                        ${data.flashcards.map(card => `
+                            <p> ${card}</p>
+
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                alert('Error processing the file. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>

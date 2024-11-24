@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Flashcards</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Flashcards</h1>
+        <div id="flashcards-container">
+            <!-- Dynamically generated content -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const response = await fetch('/get_flashcards');
+            if (response.ok) {
+                const data = await response.json();
+                const container = document.getElementById('flashcards-container');
+                container.innerHTML = `
+                    <h2>Summary</h2>
+                    <div class="summary">
+                        ${data.summary_points.map(point => `
+                            <p>${point}</p>
+                        `).join('')}
+                    </div>
+                    <h2>Flashcards</h2>
+                    <div class="flashcards">
+                        ${data.flashcards.map(card => `
+                            <p><strong>Q:</strong> ${card.question}</p>
+                            <p><strong>A:</strong> ${card.answer}</p>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                alert('Failed to load flashcards.');
+            }
+        });
+    </script>
+</body>
+</html>
