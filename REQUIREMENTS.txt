@@ -1,7 +1,6 @@
 Flask
 PyPDF2
 google-generativeai
-google-generativeai
 python-pptx
 python-docx
 paddleocr
