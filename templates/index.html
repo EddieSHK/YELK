@@ -9,24 +9,30 @@
 <body>
     <div class="container">
         <h1>AI Flashcard Generator</h1>
+
+        <!-- Form to upload multiple files -->
         <form id="upload-form">
-            <label for="file">Upload PDF Document:</label>
-            <input type="file" name="file" id="file" required>
+            <label for="files">Upload Documents (PDF, DOCX, PPTX, Images):</label>
+            <input type="file" name="files" id="files" required multiple>
             <button type="submit">Generate Flashcards</button>
         </form>
+
+        <!-- Displaying the result for summaries and flashcards -->
         <div id="result" class="result-container"></div>
+
+        <!-- Form to ask a question -->
         <form id="questionForm">
-        <label for="question">ASK EDDIE IF YOU FACE ANY QUESTION:</label>
-        <input type="text" id="question" name="question" required>
-        <button type="submit">Ask</button>
-    </form>
+            <label for="question">ASK EDDIE IF YOU FACE ANY QUESTION:</label>
+            <input type="text" id="question" name="question" required>
+            <button type="submit">Ask</button>
+        </form>
 
-    <div id="answerSection" style="display:none;">
-        <h2>Answer:</h2>
-        <p id="answerText"></p>
+        <!-- Section to display the answer -->
+        <div id="answerSection" style="display:none;">
+            <h2>Answer:</h2>
+            <p id="answerText"></p>
+        </div>
     </div>
-    </div>
-
 
     <script>
         // Handle the form submission for asking a question
@@ -55,6 +61,8 @@
                 console.error('Error:', error);
             });
         });
+
+        // Handle the form submission for generating flashcards
         const form = document.getElementById('upload-form');
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -80,8 +88,7 @@
                     <h2>Flashcards</h2>
                     <div class="flashcards">
                         ${data.flashcards.map(card => `
-                            <p> ${card}</p>
-
+                            <p>${card}</p>
                         `).join('')}
                     </div>
                 `;

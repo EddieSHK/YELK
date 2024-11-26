@@ -85,7 +85,7 @@ def extract_text_from_image(file):
 
 def ask_gemini_ai_with_genai(text: str):
     """Generate a summary and flashcards using Google Generative AI."""
-    genai.configure(api_key="AIzaSyAe9JnvjQNtr95ZeLEXLS9Ay9yzrA7vidM")
+    genai.configure(api_key="AIzaSyADe46GEGmju9hg8KMIc3qj2LuQ21ohiDE")
     model = genai.GenerativeModel('gemini-pro')
 
     # Generate content
@@ -111,7 +111,7 @@ def ask_gemini_ai_with_genai(text: str):
 
 def ask_gemini_for_answer(question: str):
     """Query Gemini AI for an answer to a specific question."""
-    genai.configure(api_key="AIzaSyAe9JnvjQNtr95ZeLEXLS9Ay9yzrA7vidM")
+    genai.configure(api_key="AIzaSyADe46GEGmju9hg8KMIc3qj2LuQ21ohiDE")
     model = genai.GenerativeModel('gemini-pro')
 
     # Generate answer to the question
@@ -144,34 +144,51 @@ def ask_question():
     })
 @app.route('/generate_flashcards', methods=['POST'])
 def generate_flashcards():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file uploaded"}), 400
+    if 'files' not in request.files:
+        return jsonify({"error": "No files uploaded"}), 400
 
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
+    files = request.files.getlist('files')  # Get all uploaded files
+    if not files:
+        return jsonify({"error": "No selected files"}), 400
 
-    if file and file.filename.endswith('.pdf'):
-        text = extract_text_from_pdf(file)
-    elif file and file.filename.endswith('.docx'):
-        text = extract_text_from_docx(file)
-    elif file and file.filename.endswith('.pptx'):
-        text = extract_text_from_pptx(file)
-    elif file and file.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
-        text = extract_text_from_image(file)
-    else:
-        return jsonify({"error": "Unsupported file format"}), 400
+    summaries = []
+    flashcards = []
 
-    summary, flashcards = ask_gemini_ai_with_genai(text)
+    for file in files:
+        if file.filename == '':
+            continue
 
-    # Save to Python lists or database
-    tracked["summary"] = tracked.get("summary", []) + summary
-    tracked["flashcards"] = tracked.get("flashcards", []) + flashcards
+        # Process each file based on its type
+        if file.filename.endswith('.pdf'):
+            text = extract_text_from_pdf(file)
+        elif file.filename.endswith('.docx'):
+            text = extract_text_from_docx(file)
+        elif file.filename.endswith('.pptx'):
+            text = extract_text_from_pptx(file)
+        elif file.filename.lower().endswith(('.png', '.jpg', '.jpeg')):
+            text = extract_text_from_image(file)
+        else:
+            continue  # Skip unsupported file formats
+
+        # Generate summary and flashcards for the current file
+        summary, file_flashcards = ask_gemini_ai_with_genai(text)
+
+        # Append the results for each file
+        summaries.append(summary)
+        flashcards.append(file_flashcards)
+
+    # Flatten the lists of summaries and flashcards to combine results
+    combined_summary = [item for sublist in summaries for item in sublist]
+    combined_flashcards = [item for sublist in flashcards for item in sublist]
+
+    # Save to tracked data (local storage or database)
+    tracked["summary"] = tracked.get("summary", []) + combined_summary
+    tracked["flashcards"] = tracked.get("flashcards", []) + combined_flashcards
     save_tracked()
 
     return jsonify({
-        "summary_points": summary,
-        "flashcards": flashcards,
+        "summary_points": combined_summary,
+        "flashcards": combined_flashcards,
         "store_in_local": True  # Suggests storing data in local storage for subsequent use
     })
 
