@@ -190,9 +190,24 @@ def generate_flashcards():
     # combined_summary = [item for sublist in summaries for item in sublist]
     # combined_flashcards = [item for sublist in flashcards for item in sublist]
 
+    # # Flatten the lists of summaries and flashcards to combine results
+    # combined_summary = [truncate_text(item,2000) for sublist in summaries for item in sublist]
+    # combined_flashcards = [truncate_text(item,2000) for sublist in flashcards for item in sublist]
+
     # Flatten the lists of summaries and flashcards to combine results
-    combined_summary = [truncate_text(item,2000) for sublist in summaries for item in sublist]
-    combined_flashcards = [truncate_text(item,2000) for sublist in flashcards for item in sublist]
+    combined_summary = [
+        truncate_text(item, 2000)
+        for sublist1 in summaries
+        for sublist2 in sublist1
+        for item in sublist2
+        if isinstance(item, str)  # Ensure only strings are processed
+    ]
+    combined_flashcards = [
+        truncate_text(item, 2000)
+        for sublist in flashcards
+        for item in sublist
+        if isinstance(item, str)  # Ensure only strings are processed
+    ]
 
     # Save to tracked data (local storage or database)
     tracked["summary"] = tracked.get("summary", []) + combined_summary
