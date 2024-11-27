@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>AI Flashcard Generator</title>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Flashcard Generator</h1>
+
+        <!-- Form to upload multiple files -->
+        <form id="upload-form">
+            <label for="files">Upload Documents (PDF, DOCX, PPTX, Images):</label>
+            <input type="file" id="file-input" multiple>
+            <div id="file-list"></div>
+            <button type="button" id="submit-btn">Generate Summary and Flashcard</button>
+        </form>
+        <div id="loading-spinner" style="display: none;">
+            <p>Processing...</p>
+            <img src="static\spinner.gif" alt="Loading..." width="5%" />
+        </div>
+        
+        <!-- Displaying the result for summaries and flashcards -->
+        <div id="result" class="result-container"></div>
+
+        <!-- Form to ask a question -->
+        <form id="questionForm">
+            <label for="question">ASK EDDIE IF YOU FACE ANY QUESTION:</label>
+            <input type="text" id="question" name="question" required>
+            <button type="submit">Ask</button>
+        </form>
+
+        <!-- Section to display the answer -->
+        <div id="answerSection" style="display:none;">
+            <h2>Answer:</h2>
+            <p id="answerText"></p>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById('upload-form');
+    const fileInput = document.getElementById("file-input");
+    const fileListDiv = document.getElementById("file-list");
+    const submitBtn = document.getElementById("submit-btn");
+    const spinner = document.getElementById('loading-spinner');
+    const resultDiv = document.getElementById('result');
+
+    // Track all uploaded files
+    let uploadedFiles = [];
+
+    // Handle file selection
+    fileInput.addEventListener("change", (event) => {
+        const newFiles = Array.from(event.target.files);
+        uploadedFiles = uploadedFiles.concat(newFiles);
+
+        // Clear the input to allow selecting the same file again
+        fileInput.value = "";
+
+        updateFileListUI();
+    });
+
+    // Update the UI to display all selected files
+    const updateFileListUI = () => {
+        fileListDiv.innerHTML = ""; // Clear the list
+        if (uploadedFiles.length === 0) {
+            fileListDiv.textContent = "No files selected.";
+            return;
+        }
+
+        const list = document.createElement("ul");
+        uploadedFiles.forEach((file, index) => {
+            const listItem = document.createElement("li");
+            listItem.textContent = file.name;
+
+            // Add a remove button for each file
+            const removeBtn = document.createElement("button");
+            removeBtn.textContent = "Remove";
+            removeBtn.style.marginLeft = "10px";
+            removeBtn.addEventListener("click", () => {
+                uploadedFiles.splice(index, 1); // Remove the file
+                updateFileListUI(); // Update the UI
+            });
+
+            listItem.appendChild(removeBtn);
+            list.appendChild(listItem);
+        });
+
+        fileListDiv.appendChild(list);
+    };
+
+    // // Handle form submission
+    // submitBtn.addEventListener("submit", async () => {
+    //     if (uploadedFiles.length === 0) {
+    //         alert("Please upload at least one file.");
+    //         return;
+    //     }
+
+    //     spinner.style.display = "block"; // Show spinner
+    //     const formData = new FormData();
+    //     uploadedFiles.forEach((file) => formData.append(file));
+
+    //     try {
+    //         const response = await fetch("/generate_flashcards", {
+    //             method: "POST",
+    //             body: formData,
+    //         });
+
+    //         if (response.ok) {
+    //             const data = await response.json();
+    //             spinner.style.display = "none"; // Hide spinner
+
+    //             // Display results
+    //             resultDiv.innerHTML = `
+    //                 <h2>Summary</h2>
+    //                 <div class="summary">
+    //                     ${data.summary_points.map(point => `<p>${point}</p>`).join("")}
+    //                 </div>
+    //                 <h2>Flashcards</h2>
+    //                 <div class="flashcards">
+    //                     ${data.flashcards.map(card => `<p>${card}</p>`).join("")}
+    //                 </div>
+    //             `;
+    //         } else {
+    //             spinner.style.display = "none";
+    //             alert("Error processing the file. Please try again.");
+    //         }
+    //     } catch (error) {
+    //         spinner.style.display = "none";
+    //         console.error("Error:", error);
+    //         alert("An unexpected error occurred. Please try again.");
+    //     }
+    // });
+
+    // Initial UI setup
+    updateFileListUI();
+
+    // Handle form submission
+    submitBtn.addEventListener("click", async () => {
+        if (uploadedFiles.length === 0) {
+            alert("Please upload at least one file.");
+            return;
+        }
+
+        spinner.style.display = "block"; // Show spinner
+        const formData = new FormData();
+        uploadedFiles.forEach((file) => formData.append("files[]", file));
+
+        try {
+            const response = await fetch("/generate_flashcards", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                spinner.style.display = "none"; // Hide spinner
+
+                // Display results
+                resultDiv.innerHTML = `
+                    <h2>Summary</h2>
+                    <div class="summary">
+                        ${data.summary_points.map(point => `<p>${point}</p>`).join("")}
+                    </div>
+                    <h2>Flashcards</h2>
+                    <div class="flashcards">
+                        ${data.flashcards.map(card => `<p>${card}</p>`).join("")}
+                    </div>
+                `;
+            } else {
+                spinner.style.display = "none";
+                alert("Error processing the file. Please try again.");
+            }
+        } catch (error) {
+            spinner.style.display = "none";
+            console.error("Error:", error);
+            alert("An unexpected error occurred. Please try again.");
+        }
+    });
+
+    // Handle the form submission for asking a question
+    document.getElementById("questionForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent form from submitting normally
+
+        const question = document.getElementById("question").value;
+        spinner.style.display = 'block'; // Show spinner for question processing
+
+        fetch('/ask_question', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'question=' + encodeURIComponent(question)
+        })
+        .then(response => response.json())
+        .then(data => {
+            spinner.style.display = 'none'; // Hide spinner
+            if (data.answer) {
+                document.getElementById("answerText").textContent = data.answer;
+                document.getElementById("answerSection").style.display = "block";
+            } else {
+                alert("Error: " + data.error);
+            }
+        })
+        .catch(error => {
+            spinner.style.display = 'none'; // Hide spinner even on error
+            console.error('Error:', error);
+        });
+    });
+});
+
+
+    </script>
+</body>
+</html>
