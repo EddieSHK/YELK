@@ -11,11 +11,17 @@
         <h1>AI Flashcard Generator</h1>
 
         <!-- Form to upload multiple files -->
+        <!-- File Upload Section -->
         <form id="upload-form">
-            <label for="files">Upload Documents (PDF, DOCX, PPTX, Images):</label>
-            <input type="file" id="file-input" multiple>
-            <div id="file-list"></div>
-            <button type="button" id="submit-btn">Generate Summary and Flashcard</button>
+            <label for="file-input">Upload Documents (PDF, DOCX, PPTX, Images):</label>
+            <!-- Hidden file input -->
+            <input type="file" id="file-input" style="display: none;" multiple>
+            <!-- Custom button to trigger file input -->
+            <button type="button" id="upload-btn">Choose Files</button>
+            <!-- File list display -->
+            <div id="file-list">No files selected.</div>
+            <!-- Submit button -->
+            <button type="button" id="submit-btn">Generate Summary and Flashcards</button>
         </form>
         <div id="loading-spinner" style="display: none;">
             <p>Processing...</p>
@@ -40,29 +46,33 @@
     </div>
 
     <script>
-    document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById('upload-form');
+    document.addEventListener("DOMContentLoaded", () => {
     const fileInput = document.getElementById("file-input");
     const fileListDiv = document.getElementById("file-list");
+    const uploadBtn = document.getElementById("upload-btn");
     const submitBtn = document.getElementById("submit-btn");
-    const spinner = document.getElementById('loading-spinner');
-    const resultDiv = document.getElementById('result');
+    const spinner = document.getElementById("loading-spinner");
+    const resultDiv = document.getElementById("result");
 
-    // Track all uploaded files
-    let uploadedFiles = [];
+    let uploadedFiles = []; // Track all uploaded files
+
+    // Open the file input dialog when clicking the custom upload button
+    uploadBtn.addEventListener("click", () => {
+        fileInput.click();
+    });
 
     // Handle file selection
-    fileInput.addEventListener("change", (event) => {
-        const newFiles = Array.from(event.target.files);
+    fileInput.addEventListener("change", () => {
+        const newFiles = Array.from(fileInput.files);
         uploadedFiles = uploadedFiles.concat(newFiles);
 
-        // Clear the input to allow selecting the same file again
+        // Clear the input to allow reselecting the same file later
         fileInput.value = "";
 
         updateFileListUI();
     });
 
-    // Update the UI to display all selected files
+    // Update file list display
     const updateFileListUI = () => {
         fileListDiv.innerHTML = ""; // Clear the list
         if (uploadedFiles.length === 0) {
@@ -91,52 +101,6 @@
         fileListDiv.appendChild(list);
     };
 
-    // // Handle form submission
-    // submitBtn.addEventListener("submit", async () => {
-    //     if (uploadedFiles.length === 0) {
-    //         alert("Please upload at least one file.");
-    //         return;
-    //     }
-
-    //     spinner.style.display = "block"; // Show spinner
-    //     const formData = new FormData();
-    //     uploadedFiles.forEach((file) => formData.append(file));
-
-    //     try {
-    //         const response = await fetch("/generate_flashcards", {
-    //             method: "POST",
-    //             body: formData,
-    //         });
-
-    //         if (response.ok) {
-    //             const data = await response.json();
-    //             spinner.style.display = "none"; // Hide spinner
-
-    //             // Display results
-    //             resultDiv.innerHTML = `
-    //                 <h2>Summary</h2>
-    //                 <div class="summary">
-    //                     ${data.summary_points.map(point => `<p>${point}</p>`).join("")}
-    //                 </div>
-    //                 <h2>Flashcards</h2>
-    //                 <div class="flashcards">
-    //                     ${data.flashcards.map(card => `<p>${card}</p>`).join("")}
-    //                 </div>
-    //             `;
-    //         } else {
-    //             spinner.style.display = "none";
-    //             alert("Error processing the file. Please try again.");
-    //         }
-    //     } catch (error) {
-    //         spinner.style.display = "none";
-    //         console.error("Error:", error);
-    //         alert("An unexpected error occurred. Please try again.");
-    //     }
-    // });
-
-    // Initial UI setup
-    updateFileListUI();
-
     // Handle form submission
     submitBtn.addEventListener("click", async () => {
         if (uploadedFiles.length === 0) {
@@ -162,11 +126,11 @@
                 resultDiv.innerHTML = `
                     <h2>Summary</h2>
                     <div class="summary">
-                        ${data.summary_points.map(point => `<p>${point}</p>`).join("")}
+                        ${data.summary_points.map((point) => `<p>${point}</p>`).join("")}
                     </div>
                     <h2>Flashcards</h2>
                     <div class="flashcards">
-                        ${data.flashcards.map(card => `<p>${card}</p>`).join("")}
+                        ${data.flashcards.map((card) => `<p>${card}</p>`).join("")}
                     </div>
                 `;
             } else {
@@ -179,6 +143,9 @@
             alert("An unexpected error occurred. Please try again.");
         }
     });
+
+    // Initial UI setup
+    updateFileListUI();
 
     // Handle the form submission for asking a question
     document.getElementById("questionForm").addEventListener("submit", function (event) {
@@ -210,7 +177,6 @@
         });
     });
 });
-
 
     </script>
 </body>
