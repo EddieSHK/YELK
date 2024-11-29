@@ -12,6 +12,7 @@ from io import BytesIO
 from docx import Document
 from pptx import Presentation
 from paddleocr import PaddleOCR
+import numpy as np
 
 app = Flask(__name__)
 
@@ -57,31 +58,37 @@ def extract_text_from_pptx(file):
     return " ".join(text)
 
 
+import easyocr
+
 def extract_text_from_image(file):
-    """Extract text from an image using PaddleOCR."""
+    """Extract text from an image using EasyOCR."""
     try:
-        # Initialize PaddleOCR (ensure that paddleocr is installed and configured correctly)
-        ocr = PaddleOCR(use_angle_cls=True, lang='en')  # Set language as English
+        # Read the file content into bytes
+        file_bytes = file.read()  # Read the uploaded file into memory
 
-        # Ensure file is opened correctly
-        image = Image.open(file)
+        # Convert the bytes into a PIL image
+        image = Image.open(BytesIO(file_bytes))
 
-        # Convert the image to RGB if it's not already (PaddleOCR requires RGB)
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
+        # Convert the PIL Image to a numpy array (required by EasyOCR)
+        image_np = np.array(image)
 
-        # Perform OCR on the image
-        result = ocr.ocr(image, cls=True)
+        # Initialize EasyOCR reader (English language)
+        reader = easyocr.Reader(['en'])
 
-        # Extract text from the OCR result
-        text = ""
-        for line in result[0]:
-            text += line[1] + " "
-        return text
+        # Use EasyOCR to read the text from the image
+        result = reader.readtext(image_np)
+
+        # Extract and join the text from the result
+        text = " ".join([item[1] for item in result])
+
+        if not text.strip():
+            print("No text detected in the image.")
+        
+        return text.strip()
+
     except Exception as e:
         print(f"Error processing image: {e}")
         return ""
-
 
 def ask_gemini_ai_with_genai(text: str):
     """Generate a summary and flashcards using Google Generative AI."""
