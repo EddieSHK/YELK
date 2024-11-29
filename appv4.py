@@ -116,6 +116,42 @@ def ask_gemini_ai_with_genai(text: str):
     print("FLASHCARD:", flashcards)
     return summary, flashcards
 
+def ask_gemini_ai_with_genai_summary(text: str):
+    """Generate a summary using Google Generative AI."""
+    genai.configure(api_key="AIzaSyADe46GEGmju9hg8KMIc3qj2LuQ21ohiDE")
+    model = genai.GenerativeModel('gemini-pro')
+
+    # Generate content
+    prompt = (
+        f"Summarize the following content in paragraph form :\n\n{text}"
+    )
+
+    response = model.generate_content(prompt)
+
+    # Parse the generated content
+    generated_text = response.text
+    print(generated_text)
+    summary = [response.text]
+
+    print("Summary:", summary)
+    return summary
+
+def ask_gemini_ai_with_genai_flashCard(text: str):
+    """Generate a flashcards using Google Generative AI."""
+    genai.configure(api_key="AIzaSyADe46GEGmju9hg8KMIc3qj2LuQ21ohiDE")
+    model = genai.GenerativeModel('gemini-pro')
+
+    # Generate content
+    prompt2 = (
+        f"Generate flashcard with question and answer: in paragraph form\n\n{text}"
+    )
+
+    response2 = model.generate_content(prompt2)
+
+    flashcards = [response2.text]
+
+    print("FLASHCARD:", flashcards)
+    return flashcards
 
 def ask_gemini_for_answer(question: str):
     """Query Gemini AI for an answer to a specific question."""
@@ -182,7 +218,7 @@ def generate_flashcards():
         # Process text in chunks if it exceeds token limits
         file_flashcards = []
         for chunk in split_text_into_chunks(text, 2000):
-            _, chunk_flashcards = ask_gemini_ai_with_genai(chunk)  # Only get flashcards
+            chunk_flashcards = ask_gemini_ai_with_genai_flashCard(chunk)  # Only get flashcards
             file_flashcards.extend(chunk_flashcards)
 
         # Append the processed file results
@@ -237,7 +273,7 @@ def generate_summary():
         # Process text in chunks if it exceeds token limits
         file_summary = []
         for chunk in split_text_into_chunks(text, 2000):
-            summary, _ = ask_gemini_ai_with_genai(chunk)  # Only get the summary
+            summary= ask_gemini_ai_with_genai_summary(chunk)  # Only get the summary
             file_summary.append(summary)
 
         # Append the processed file results
