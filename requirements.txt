@@ -8,3 +8,5 @@ paddlepaddle
 transformers
 sentence-transformers
 nltk
+numpy
+easyocr
