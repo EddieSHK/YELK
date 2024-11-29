@@ -24,7 +24,7 @@ In the terminal:
     cd C:\Path\To\Your\Project
     python -m venv vir_env
     vir_env\Scripts\activate
-    pip install -r REQUIREMENTS.txt
+    pip install -r requirements.txt
     pip list (Optional, to verify the installation by listing installed libraries)
     deactivate (When Finish)
 

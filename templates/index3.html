@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>AI Flashcard Generator</title>
+    <style>
+        body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f8ff; /* Light blue background */
+    color: #333; /* Darker text for contrast */
+}
+
+.container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #ffffff; /* White background for the main content */
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    text-align: center;
+}
+
+h1, h2 {
+    color: #0066cc; /* Bright blue headers */
+    margin-bottom: 20px;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 10px;
+    display: block;
+    color: #444;
+}
+
+/* Form styles */
+form {
+    margin-bottom: 20px;
+}
+
+input[type="file"] {
+    display: block;
+    margin: 10px auto;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+button {
+    background-color: #0066cc; /* Bright blue button */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #004d99; /* Darker blue on hover */
+}
+
+/* Style for the file list items */
+#file-list ul {
+    list-style: none; /* Remove bullets */
+    padding: 0;
+    margin: 0;
+}
+
+#file-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f9f9f9;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+#file-list button {
+    background-color: #ff4d4d; /* Red background for the remove button */
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#file-list button:hover {
+    background-color: #cc0000; /* Darker red on hover */
+}
+
+/* Summary and flashcards list styles */
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+li {
+    background-color: #f9f9f9; /* Subtle background for list items */
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    text-align: left;
+}
+
+li strong {
+    color: #0066cc;
+}
+
+/* Flashcard styling */
+.flashcard {
+    text-align: left;
+    margin-bottom: 15px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.flashcard p {
+    margin: 5px 0;
+}
+
+/* Back button styles */
+#back-button {
+    display: inline-block;
+    background-color: #0066cc;
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-top: 20px;
+    font-size: 16px;
+}
+
+#back-button:hover {
+    background-color: #004d99;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+    .container {
+        margin: 20px;
+        padding: 15px;
+    }
+
+    button, #back-button {
+        font-size: 14px;
+        padding: 8px 15px;
+    }
+
+    li {
+        font-size: 14px;
+    }
+}
+        .drag-drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 20%;
+            
+            text-align: center;
+            color: #666;
+            background-color: #f9f9f9;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .drag-drop-zone.dragover {
+            border-color: #007bff;
+            background-color: #e8f4ff;
+            color: #007bff;
+        }
+
+        .drag-drop-zone p {
+            margin: 0;
+        }
+
+        #upload-btn-link {
+            color: #007bff;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Flashcard Generator</h1>
+
+        <!-- Form to upload multiple files -->
+        <form id="upload-form">
+            <!-- Drag-and-Drop File Upload Section -->
+            <div id="drag-and-drop-zone" class="drag-drop-zone">
+                <p>Drag and drop files here or <span id="upload-btn-link">click to upload</span></p>
+            </div>
+
+            <!-- File list display -->
+            <div id="file-list">No files selected.</div>
+
+            <!-- Submit button -->
+            <button type="button" id="submit-btn">Generate Summary</button>
+        </form>
+
+        <div id="loading-spinner" style="display: none;">
+            <p>Processing...</p>
+            <img src="static/spinner.gif" alt="Loading..." width="5%" />
+        </div>
+        
+        <!-- Displaying the result for summaries and flashcards -->
+        <div id="result" class="result-container"></div>
+
+        <form>
+            <!-- Submit button -->
+            <button type="button" id="submit-btn2" style="display: none;">Show Flashcards</button>
+        </form>
+        <div id="loading-spinner2" style="display: none;">
+            <p>Processing...</p>
+            <img src="static/spinner.gif" alt="Loading..." width="5%" />
+        </div>
+        <!-- Displaying the result for flashcards -->
+        <div id="result2" class="result-container2" style="display: none;"></div>
+
+        <!-- Form to ask a question -->
+        <form id="questionForm">
+            <label for="question">ASK EDDIE IF YOU FACE ANY QUESTION:</label>
+            <input type="text" id="question" name="question" required>
+            <button type="submit">Ask</button>
+        </form>
+
+        <!-- Section to display the answer -->
+        <div id="answerSection" style="display:none;">
+            <h2>Answer:</h2>
+            <p id="answerText"></p>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const fileListDiv = document.getElementById("file-list");
+        const submitBtn = document.getElementById("submit-btn");
+        const submitBtn2 = document.getElementById("submit-btn2");
+        const spinner = document.getElementById("loading-spinner2");
+        const spinner2 = document.getElementById("loading-spinner2");
+        const resultDiv = document.getElementById("result");
+        const resultDiv2 = document.getElementById("result2");
+        const dragDropZone = document.getElementById("drag-and-drop-zone");
+        const uploadBtnLink = document.getElementById("upload-btn-link");
+
+        let uploadedFiles = []; // Track all uploaded files
+
+        // Drag-and-Drop Event Handlers
+        dragDropZone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            dragDropZone.classList.add("dragover");
+        });
+
+        dragDropZone.addEventListener("dragleave", () => {
+            dragDropZone.classList.remove("dragover");
+        });
+
+        dragDropZone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dragDropZone.classList.remove("dragover");
+
+            const files = Array.from(e.dataTransfer.files);
+            uploadedFiles = uploadedFiles.concat(files);
+            updateFileListUI();
+        });
+
+        // Trigger file input when clicking on the link inside the drag-and-drop zone
+        uploadBtnLink.addEventListener("click", () => {
+            const fileInput = document.createElement("input");
+            fileInput.type = "file";
+            fileInput.accept = "application/pdf, .docx, .pptx, .jpg, .jpeg, .png"; // Accept common file types
+            fileInput.multiple = true;
+
+            fileInput.addEventListener("change", () => {
+                const newFiles = Array.from(fileInput.files);
+                uploadedFiles = uploadedFiles.concat(newFiles);
+                updateFileListUI();
+            });
+
+            fileInput.click();
+        });
+
+        // Update file list display
+        const updateFileListUI = () => {
+            fileListDiv.innerHTML = ""; // Clear the list
+            if (uploadedFiles.length === 0) {
+                fileListDiv.textContent = "No files selected.";
+                return;
+            }
+
+            const list = document.createElement("ul");
+            uploadedFiles.forEach((file, index) => {
+                const listItem = document.createElement("li");
+                listItem.textContent = file.name;
+
+                // Add a remove button for each file
+                const removeBtn = document.createElement("button");
+                removeBtn.textContent = "Remove";
+                removeBtn.style.marginLeft = "10px";
+                removeBtn.addEventListener("click", () => {
+                    uploadedFiles.splice(index, 1); // Remove the file
+                    updateFileListUI(); // Update the UI
+                });
+
+                listItem.appendChild(removeBtn);
+                list.appendChild(listItem);
+            });
+
+            fileListDiv.appendChild(list);
+        };
+
+        // Handle form submission for generating summary
+        submitBtn.addEventListener("click", async () => {
+            if (uploadedFiles.length === 0) {
+                alert("Please upload at least one file.");
+                return;
+            }
+
+            spinner.style.display = "block"; // Show spinner
+            const formData = new FormData();
+            uploadedFiles.forEach((file) => formData.append("files[]", file));
+
+            try {
+                const response = await fetch("/generate_flashcards", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    spinner.style.display = "none"; // Hide spinner
+
+                    // Display the summary and hide flashcards
+                    resultDiv.innerHTML = `
+                        <h2>Summary</h2>
+                        <div class="summary">
+                            ${data.summary_points.map((point) => `<p>${point}</p>`).join("")}
+                        </div>`;
+                    submitBtn2.style.display = "block"; // Show "Show Flashcards" button
+                    resultDiv2.innerHTML = `
+                        <h2>Flashcards</h2>
+                        <div class="flashcards">
+                            ${data.flashcards.map((card) => `<p>${card}</p>`).join("")}
+                        </div>`;
+                } else {
+                    spinner.style.display = "none";
+                    alert("Error processing the file. Please try again.");
+                }
+            } catch (error) {
+                spinner.style.display = "none";
+                console.error("Error:", error);
+                alert("An unexpected error occurred. Please try again.");
+            }
+        });
+
+        // Handle form submission for displaying flashcards
+        submitBtn2.addEventListener("click", async () => {
+            resultDiv2.style.display = "block"; // Show flashcards section
+        });
+
+        // Ensure UI is updated initially
+        updateFileListUI();
+    });
+
+    </script>
+</body>
+</html>
