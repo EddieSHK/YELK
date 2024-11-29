@@ -32,7 +32,7 @@ In the terminal:
 
 In the terminal:
     cd C:\Path\To\Your\Project
-    streamlit run app.py
+    python appv4.py
     Copy the the web address and open any preferred web browser and paste it in,
         e.g (http://localhost:8501)
     deactivate (When Finish)

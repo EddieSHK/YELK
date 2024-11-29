@@ -315,5 +315,63 @@ def truncate_text(text, max_tokens=4000):
     words = text.split()
     return " ".join(words[:max_tokens]) + ("..." if len(words) > max_tokens else "")
 
+
+@app.route('/download_summary_pptx', methods=['POST'])
+def handle_summary_pptx():
+    # Receive and process data for PPTX
+    data = request.get_json()
+    if not data or 'summary_points' not in data:
+        return jsonify({"error": "Invalid data"}), 400
+
+    # Extract summary points
+    summary_points = data['summary_points']
+    print("Received summary for PPTX:", summary_points)
+
+    # Respond with success message
+    return jsonify({"message": "Summary data received for PPTX"}), 200
+
+@app.route('/download_summary_pdf', methods=['POST'])
+def handle_summary_pdf():
+    # Receive and process data for PPTX
+    data = request.get_json()
+    if not data or 'summary_points' not in data:
+        return jsonify({"error": "Invalid data"}), 400
+
+    # Extract summary points
+    summary_points = data['summary_points']
+    print("Received summary for PDF:", summary_points)
+
+    # Respond with success message
+    return jsonify({"message": "Summary data received for PDF"}), 200
+
+@app.route('/download_flashcard_pptx', methods=['POST'])
+def handle_flashcard_pptx():
+    # Receive and process data for PPTX
+    data = request.get_json()
+    if not data or 'flashcard_points' not in data:
+        return jsonify({"error": "Invalid data"}), 400
+
+    # Extract flashcard points
+    flashcard_points = data['flashcard_points']
+    print("Received flashcard for PPTX:", flashcard_points)
+
+    # Respond with success message
+    return jsonify({"message": "Flashcard data received for PPTX"}), 200
+
+@app.route('/download_flashcard_pdf', methods=['POST'])
+def handle_flashcard_pdf():
+    # Receive and process data for PPTX
+    data = request.get_json()
+    if not data or 'flashcard_points' not in data:
+        return jsonify({"error": "Invalid data"}), 400
+
+    # Extract flashcard points
+    flashcard_points = data['flashcard_points']
+    print("Received flashcard for PDF:", flashcard_points)
+
+    # Respond with success message
+    return jsonify({"message": "Flashcard data received for PDF"}), 200
+
+
 if __name__ == "__main__":
     app.run(debug=True)

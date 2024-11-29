@@ -249,6 +249,13 @@ li strong {
         </div>
     </div>
 
+    <div id="download-section" style="margin-top: 20px;">
+        <button id="download-summary-pptx">Download Summary as PPTX</button>
+        <button id="download-summary-pdf">Download Summary as PDF</button>
+        <button id="download-flashcards-pptx">Download Flashcards as PPTX</button>
+        <button id="download-flashcards-pdf">Download Flashcards as PDF</button>
+    </div>
+
     <script>
          // Update the displayed value of the slider
     function updateQuestionCount(value) {
@@ -430,6 +437,76 @@ document.getElementById("questionSlider").addEventListener("input", (event) => {
 
         // Ensure UI is updated initially
         updateFileListUI();
+
+                // Add event listeners for the buttons
+                document.getElementById("download-summary-pptx").addEventListener("click", () => sendSummaryData("pptx"));
+        document.getElementById("download-summary-pdf").addEventListener("click", () => sendSummaryData("pdf"));
+
+        // Function to send the summary data to the server
+        async function sendSummaryData(fileType) {
+            const summaryElements = document.querySelectorAll(".summary p");
+            if (summaryElements.length === 0) {
+                alert("Please generate a summary first.");
+                return;
+            }
+
+            // Collect the summary points into an array
+            const summaryPoints = Array.from(summaryElements).map((el) => el.textContent);
+
+            try {
+                const response = await fetch(`/download_summary_${fileType}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ summary_points: summaryPoints }),
+                });
+
+                if (response.ok) {
+                    console.log(`Summary data successfully sent for ${fileType}`);
+                } else {
+                    alert("Error sending the summary data. Please try again.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An unexpected error occurred. Please try again.");
+            }
+        }
+
+        // Add event listeners for the buttons
+        document.getElementById("download-flashcards-pptx").addEventListener("click", () => sendFlashCardData("pptx"));
+        document.getElementById("download-flashcards-pdf").addEventListener("click", () => sendFlashCardData("pdf"));
+
+        // Function to send the flashcards data to the server
+        async function sendFlashCardData(fileType) {
+            const flashcardsElements = document.querySelectorAll(".flashcards p");
+            if (flashcardsElements.length === 0) {
+                alert("Please generate a flashcard first.");
+                return;
+            }
+
+            // Collect the summary points into an array
+            const flashCardPoints = Array.from(flashcardsElements).map((el) => el.textContent);
+
+            try {
+                const response = await fetch(`/download_flashcard_${fileType}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ flashcard_points: flashCardPoints }),
+                });
+
+                if (response.ok) {
+                    console.log(`flashcard data successfully sent for ${fileType}`);
+                } else {
+                    alert("Error sending the flashcard data. Please try again.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An unexpected error occurred. Please try again.");
+            }
+        }
     });
     </script>
 </body>
