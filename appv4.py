@@ -143,13 +143,26 @@ def ask_gemini_ai_with_genai_flashCard(text: str):
 
     # Generate content
     prompt2 = (
-        f"Generate flashcard with question and answer: in paragraph form\n\n{text}"
+        f"Generate 5 flashcard question using the text i want just the question without any numbering or symbol:\n\n{text}"
     )
 
     response2 = model.generate_content(prompt2)
+    questions = response2.text.strip().split("\n")  
+    #flashcards = [response2.text]
+    flashcards = []
 
-    flashcards = [response2.text]
+    for question in questions:
+        if question.strip():  # Ensure the question is not empty
+            # Step 2: Generate answers for each question
+            answer_prompt = f"Answer the following question based on the text without extra thing or symbol or numbering just the answer:\n\nText:\n{text}\n\nQuestion:\n{question}"
+            answer_response = model.generate_content(answer_prompt)
 
+            # Construct the flashcard
+            flashcards.append({
+                "question": question.strip(),
+                "answer": answer_response.text.strip()
+            })
+    
     print("FLASHCARD:", flashcards)
     return flashcards
 
@@ -216,30 +229,19 @@ def generate_flashcards():
             continue  # Skip unsupported file formats
 
         # Process text in chunks if it exceeds token limits
-        file_flashcards = []
         for chunk in split_text_into_chunks(text, 2000):
             chunk_flashcards = ask_gemini_ai_with_genai_flashCard(chunk)  # Only get flashcards
-            file_flashcards.extend(chunk_flashcards)
+            flashcards.extend(chunk_flashcards)
 
-        # Append the processed file results
-        flashcards.append(file_flashcards)
-
-    # Flatten the list of flashcards
-    combined_flashcards = [
-        truncate_text(item, 2000)
-        for sublist in flashcards
-        for item in sublist
-        if isinstance(item, str)  # Ensure only strings are processed
-    ]
-
-    # Save to tracked data (local storage or database)
-    tracked["flashcards"] = tracked.get("flashcards", []) + combined_flashcards
+    # Save to tracked data
+    tracked["flashcards"] = tracked.get("flashcards", []) + flashcards
     save_tracked()
 
     return jsonify({
-        "flashcards": combined_flashcards,
-        "store_in_local": True  # Suggests storing data in local storage for subsequent use
+        "flashcards": flashcards,
+        "store_in_local": True  # Suggest storing data in local storage
     })
+
 
 
 @app.route('/generate_summary', methods=['POST'])

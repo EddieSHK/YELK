@@ -347,7 +347,7 @@ li strong {
                     resultFlashCardDiv.innerHTML = `
                         <h2>Flashcards</h2>
                         <div class="flashcards">
-                            ${data.flashcards.map((card) => `<p>${card}</p>`).join("")}
+                            ${data.flashcards.map((card) => `<p><strong>Question:</strong>: ${card.question}<br><strong>Answer:</strong>: ${card.answer}<br><br><br></p>`).join("")}
                         </div>
                     `;
                 } else {
