@@ -216,7 +216,11 @@ li strong {
 
             <!-- File list display -->
             <div id="file-list">No files selected.</div>
-
+            <div>
+                <label for="questionSlider">Select Number of Questions:</label>
+                <input type="range" id="questionSlider" name="questionSlider" min="1" max="5" value="3" oninput="updateQuestionCount(this.value)">
+                <span id="sliderValue">3</span>
+            </div>
             <!-- Submit button -->
             <button type="button" id="summary-btn">Generate Summary</button>
             <button type="button" id="submit-btn">Generate Flashcards</button>
@@ -246,6 +250,11 @@ li strong {
     </div>
 
     <script>
+         // Update the displayed value of the slider
+    function updateQuestionCount(value) {
+        document.getElementById("sliderValue").innerText = value;
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
         const fileListDiv = document.getElementById("file-list");
         const submitBtn = document.getElementById("submit-btn");
@@ -324,42 +333,59 @@ li strong {
 
         // Handle form submission for generating flashcards
         submitBtn.addEventListener("click", async () => {
-            if (uploadedFiles.length === 0) {
-                alert("Please upload at least one file.");
-                return;
-            }
+    if (uploadedFiles.length === 0) {
+        alert("Please upload at least one file.");
+        return;
+    }
 
-            spinner.style.display = "block"; // Show spinner
-            const formData = new FormData();
-            uploadedFiles.forEach((file) => formData.append("files[]", file));
+    const questionCount = document.getElementById("questionSlider").value; // Get slider value
+    spinner.style.display = "block"; // Show spinner
+    const formData = new FormData();
 
-            try {
-                const response = await fetch("/generate_flashcards", {
-                    method: "POST",
-                    body: formData,
-                });
+    // Append files to FormData
+    uploadedFiles.forEach((file) => formData.append("files[]", file));
 
-                if (response.ok) {
-                    const data = await response.json();
-                    spinner.style.display = "none"; // Hide spinner
+    // Append slider value to FormData
+    formData.append("question_count", questionCount);
 
-                    // Display results
-                    resultFlashCardDiv.innerHTML = `
-                        <h2>Flashcards</h2>
-                        <div class="flashcards">
-                            ${data.flashcards.map((card) => `<p><strong>Question:</strong>: ${card.question}<br><strong>Answer:</strong>: ${card.answer}<br><br><br></p>`).join("")}
-                        </div>
-                    `;
-                } else {
-                    spinner.style.display = "none";
-                    alert("Error processing the file. Please try again.");
-                }
-            } catch (error) {
-                spinner.style.display = "none";
-                console.error("Error:", error);
-                alert("An unexpected error occurred. Please try again.");
-            }
+    try {
+        const response = await fetch("/generate_flashcards", {
+            method: "POST",
+            body: formData,
         });
+
+        if (response.ok) {
+            const data = await response.json();
+            spinner.style.display = "none"; // Hide spinner
+
+            // Display results
+            resultFlashCardDiv.innerHTML = `
+                <h2>Flashcards</h2>
+                <div class="flashcards">
+                    ${data.flashcards
+                        .map(
+                            (card) =>
+                                `<p><strong>Question:</strong> ${card.question}<br><strong>Answer:</strong> ${card.answer}<br><br><br></p>`
+                        )
+                        .join("")}
+                </div>
+            `;
+        } else {
+            spinner.style.display = "none";
+            alert("Error processing the file. Please try again.");
+        }
+    } catch (error) {
+        spinner.style.display = "none";
+        console.error("Error:", error);
+        alert("An unexpected error occurred. Please try again.");
+    }
+});
+
+// Update slider value display
+document.getElementById("questionSlider").addEventListener("input", (event) => {
+    document.getElementById("sliderValue").innerText = event.target.value;
+});
+
 
         // Handle form submission for generating summary
         summaryBtn.addEventListener("click", async () => {
