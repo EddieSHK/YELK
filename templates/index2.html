@@ -250,10 +250,10 @@ li strong {
     </div>
 
     <div id="download-section" style="margin-top: 20px;">
-        <button id="download-summary-pptx">Download Summary as PPTX</button>
-        <button id="download-summary-pdf">Download Summary as PDF</button>
-        <button id="download-flashcards-pptx">Download Flashcards as PPTX</button>
-        <button id="download-flashcards-pdf">Download Flashcards as PDF</button>
+        <!-- <button id="download-summary-pptx">Download Summary as PPTX</button> -->
+        <button id="download-summary-pdf" style="align-items: center; margin-left: 31.5vw;">Download Summary as PDF</button>
+        <!-- <button id="download-flashcards-pptx" style="align-items: center; margin-right: 28vw;">Download Flashcards as PPTX</button> -->
+        <button id="download-flashcards-pdf" style="align-items: center; margin-right: 28vw;">Download Flashcards as PDF</button>
     </div>
 
     <script>
@@ -438,8 +438,8 @@ document.getElementById("questionSlider").addEventListener("input", (event) => {
         // Ensure UI is updated initially
         updateFileListUI();
 
-                // Add event listeners for the buttons
-                document.getElementById("download-summary-pptx").addEventListener("click", () => sendSummaryData("pptx"));
+        // Add event listeners for the buttons
+        // document.getElementById("download-summary-pptx").addEventListener("click", () => sendSummaryData("pptx"));
         document.getElementById("download-summary-pdf").addEventListener("click", () => sendSummaryData("pdf"));
 
         // Function to send the summary data to the server
@@ -463,9 +463,17 @@ document.getElementById("questionSlider").addEventListener("input", (event) => {
                 });
 
                 if (response.ok) {
-                    console.log(`Summary data successfully sent for ${fileType}`);
+                    const blob = await response.blob(); // Receive the PDF as a binary blob
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = "summary.pdf";
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    console.log(`Summary PDF downloaded successfully`);
                 } else {
-                    alert("Error sending the summary data. Please try again.");
+                    alert("Error generating the summary PDF. Please try again.");
                 }
             } catch (error) {
                 console.error("Error:", error);
@@ -474,10 +482,9 @@ document.getElementById("questionSlider").addEventListener("input", (event) => {
         }
 
         // Add event listeners for the buttons
-        document.getElementById("download-flashcards-pptx").addEventListener("click", () => sendFlashCardData("pptx"));
+        // document.getElementById("download-flashcards-pptx").addEventListener("click", () => sendFlashCardData("pptx"));
         document.getElementById("download-flashcards-pdf").addEventListener("click", () => sendFlashCardData("pdf"));
 
-        // Function to send the flashcards data to the server
         async function sendFlashCardData(fileType) {
             const flashcardsElements = document.querySelectorAll(".flashcards p");
             if (flashcardsElements.length === 0) {
@@ -485,7 +492,7 @@ document.getElementById("questionSlider").addEventListener("input", (event) => {
                 return;
             }
 
-            // Collect the summary points into an array
+            // Collect the flashcard points into an array
             const flashCardPoints = Array.from(flashcardsElements).map((el) => el.textContent);
 
             try {
@@ -498,9 +505,19 @@ document.getElementById("questionSlider").addEventListener("input", (event) => {
                 });
 
                 if (response.ok) {
-                    console.log(`flashcard data successfully sent for ${fileType}`);
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = "flashcard.pdf";
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    console.log("Flashcard PDF downloaded successfully");
                 } else {
-                    alert("Error sending the flashcard data. Please try again.");
+                    const errorDetails = await response.json();
+                    console.error("Server error:", errorDetails);
+                    alert("Error generating the flashcard PDF. Please try again.");
                 }
             } catch (error) {
                 console.error("Error:", error);
