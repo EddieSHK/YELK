@@ -1,24 +1,13 @@
+
 # Slide Reader and Flashcard Generator
-
+ 
 This project uses Python to extract content from PowerPoint slides, summarize them, and generate flashcards for revision. The app is built using Streamlit for an interactive user interface.
-
----
 
 ## Prerequisites
 
 Before you begin, ensure you have the following installed on your system:
 - Python 3.8 or higher
 - pip (Python package manager)
-
----
-
-## Setting Up the Virtual Environment
-
-To keep dependencies isolated, it's recommended to create a virtual environment for this project. Follow the steps below:
-
-1. Open your terminal or command prompt.
-
-2. Navigate to the folder where you want to set up the environment:
 
 In the terminal:
 ```bash
@@ -39,4 +28,4 @@ In the terminal:
         e.g (http://localhost:8501)
     deactivate (When Finish)
 
-## Summary
+
