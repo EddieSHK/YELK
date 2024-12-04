@@ -12,18 +12,20 @@ Before you begin, ensure you have the following installed on your system:
 In the terminal:
 ```bash
     cd C:\Path\To\Your\Project
-```
+
     python -m venv vir_env
     vir_env\Scripts\activate
     pip install -r requirements.txt
     pip list (Optional, to verify the installation by listing installed libraries)
     deactivate (When Finish)
-
+```
 ## Running the program
 
 In the terminal:
+```bash
     cd C:\Path\To\Your\Project
     python appv4.py
+```
     Copy the the web address and open any preferred web browser and paste it in,
         e.g (http://localhost:8501)
     deactivate (When Finish)
