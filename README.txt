@@ -21,7 +21,9 @@ To keep dependencies isolated, it's recommended to create a virtual environment 
 2. Navigate to the folder where you want to set up the environment:
 
 In the terminal:
+```bash
     cd C:\Path\To\Your\Project
+```
     python -m venv vir_env
     vir_env\Scripts\activate
     pip install -r requirements.txt
