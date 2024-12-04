@@ -38,3 +38,5 @@ In the terminal:
     Copy the the web address and open any preferred web browser and paste it in,
         e.g (http://localhost:8501)
     deactivate (When Finish)
+
+## Summary
