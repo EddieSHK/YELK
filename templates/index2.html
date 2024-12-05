@@ -524,6 +524,35 @@ document.getElementById("questionSlider").addEventListener("input", (event) => {
                 alert("An unexpected error occurred. Please try again.");
             }
         }
+        // Handle the form submission for asking a question
+        document.getElementById("questionForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent form from submitting normally
+
+        const question = document.getElementById("question").value;
+        spinner.style.display = 'block'; // Show spinner for question processing
+
+        fetch('/ask_question', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'question=' + encodeURIComponent(question)
+        })
+        .then(response => response.json())
+        .then(data => {
+            spinner.style.display = 'none'; // Hide spinner
+            if (data.answer) {
+                document.getElementById("answerText").textContent = data.answer;
+                document.getElementById("answerSection").style.display = "block";
+            } else {
+                alert("Error: " + data.error);
+            }
+        })
+        .catch(error => {
+            spinner.style.display = 'none'; // Hide spinner even on error
+            console.error('Error:', error);
+        });
+    });    
     });
     </script>
 </body>
