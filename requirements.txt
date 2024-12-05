@@ -11,3 +11,4 @@ nltk
 numpy
 easyocr
 fpdf
+torch==2.3.1
