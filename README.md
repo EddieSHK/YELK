@@ -1,7 +1,7 @@
 
 # Slide Reader and Flashcard Generator
  
-This project uses Python to extract content from PowerPoint slides, summarize them, and generate flashcards for revision. The app is built using Streamlit for an interactive user interface.
+This project uses Python to extract content from PowerPoint slides, summarize them, and generate flashcards for revision. The app is built using flask for an interactive user interface.
 
 ## Prerequisites
 
