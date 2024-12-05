@@ -3,7 +3,7 @@ import os
 os.environ['PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION'] = 'python'
 # Set the environment variable to avoid OpenMP errors
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 from PyPDF2 import PdfReader
 import google.generativeai as genai
 import json
@@ -13,6 +13,7 @@ from docx import Document
 from pptx import Presentation
 from paddleocr import PaddleOCR
 import numpy as np
+from fpdf import FPDF
 
 
 app = Flask(__name__)
@@ -314,6 +315,97 @@ def split_text_into_chunks(text, max_token_limit=4000):
 def truncate_text(text, max_tokens=4000):
     words = text.split()
     return " ".join(words[:max_tokens]) + ("..." if len(words) > max_tokens else "")
+
+
+# @app.route('/download_summary_pptx', methods=['POST'])
+# def handle_summary_pptx():
+#     # Receive and process data for PPTX
+#     data = request.get_json()
+#     if not data or 'summary_points' not in data:
+#         return jsonify({"error": "Invalid data"}), 400
+
+#     # Extract summary points
+#     summary_points = data['summary_points']
+#     print("Received summary for PPTX:", summary_points)
+
+#     # Respond with success message
+#     return jsonify({"message": "Summary data received for PPTX"}), 200
+# Create summary PDF function
+
+def create_pdf(title, summary_points):
+    pdf = FPDF()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+    # Add the title
+    pdf.set_font("Arial", style="B", size=16)
+    pdf.cell(200, 10, txt=title, ln=True, align="C")
+    pdf.ln(10)  # Line break
+
+    pdf.set_font("Arial", size=12)
+    # Add the summary points
+    max_width = 190  # Width of the page minus margins
+
+    # Combine all the points into one block of text
+    combined_text = "\n\n".join(summary_points)
+
+    # Write the combined text into the PDF
+    pdf.multi_cell(max_width, 10, combined_text)
+
+    # Use BytesIO to save the PDF into memory
+    pdf_buffer = BytesIO()
+    pdf_content = pdf.output(dest='S').encode('latin1')  # Get the PDF content as bytes
+    pdf_buffer.write(pdf_content)
+    pdf_buffer.seek(0)  # Rewind the buffer to the beginning
+    return pdf_buffer
+
+@app.route("/download_summary_pdf", methods=["POST"])
+def handle_summary_pdf():
+    summary_points = request.json.get("summary_points", [])
+    pdf_file = create_pdf("Slide Summary", summary_points)
+    
+    return send_file(
+        pdf_file,
+        as_attachment=True,
+        download_name="summary.pdf",
+        mimetype="application/pdf"
+    )
+
+# @app.route('/download_flashcard_pptx', methods=['POST'])
+# def handle_flashcard_pptx():
+#     # Receive and process data for PPTX
+#     data = request.get_json()
+#     if not data or 'flashcard_points' not in data:
+#         return jsonify({"error": "Invalid data"}), 400
+
+#     # Extract flashcard points
+#     flashcard_points = data['flashcard_points']
+#     print("Received flashcard for PPTX:", flashcard_points)
+
+#     # Respond with success message
+#     return jsonify({"message": "Flashcard data received for PPTX"}), 200
+
+@app.route('/download_flashcard_pdf', methods=['POST'])
+def handle_flashcard_pdf():
+    # Receive and process data for PPTX
+    data = request.get_json()
+    if not data or 'flashcard_points' not in data:
+        return jsonify({"error": "Invalid data"}), 400
+
+    # Extract flashcard points
+    flashcard_points = data['flashcard_points']
+    print("Received flashcard for PDF:", flashcard_points)
+
+    # Generate the PDF
+    pdf_file = create_pdf("Flashcards",flashcard_points)
+
+    # Serve the generated PDF as a downloadable file
+    return send_file(
+        pdf_file,
+        as_attachment=True,
+        download_name="flashcard.pdf",
+        mimetype='application/pdf')
 
 if __name__ == "__main__":
     app.run(debug=True)
