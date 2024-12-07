@@ -24,7 +24,7 @@ In the terminal:
 In the terminal:
 
     cd C:\Path\To\Your\Project
-    python appv4.py
+    python app.py
 
 Copy the the web address and open any preferred web browser and paste it in,
 e.g (http://localhost:8501)
